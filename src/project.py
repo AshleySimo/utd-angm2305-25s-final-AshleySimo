@@ -3,13 +3,16 @@ import sys
 import pygame
 
 
+SCREEN_WIDTH = 640
+SCREEN_HEIGHT = 480
+
+
 def main():
     pygame.init()
     pygame.display.set_caption("Flower Farm")
     clock = pygame.time.Clock()
     dt = 0
-    resolution = (800, 600) # Temp
-    screen = pygame.display.set_mode(resolution)
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
     running = True
     while running:
