@@ -36,8 +36,15 @@ class Player():
             self.direction.x = 0
     
     def move(self, dt):
-        self.pos += self.direction * self.speed * dt
-        self.rect.center = self.pos
+        if self.direction.magnitude() > 0:
+            self.direction = self.direction.normalize()
+
+        # Horizontal Movement
+        self.pos.x += self.direction.x * self.speed * dt
+        self.rect.centerx = self.pos.x
+        # Vertical Movement
+        self.pos.y += self.direction.y * self.speed * dt
+        self.rect.centery = self.pos.y
 
     def update(self, dt):
         self.input()
