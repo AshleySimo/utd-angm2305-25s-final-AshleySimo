@@ -21,7 +21,7 @@ class Player():
 
         self.direction = pygame.math.Vector2()
         self.pos = pygame.math.Vector2(self.rect.center)
-        self.speed = 0.25 # milliseconds
+        self.speed = 25
 
     def import_assets(self):
         self.animations = {'up': [], 'down': [], 'left': [], 'right': [], 
@@ -30,22 +30,32 @@ class Player():
         for animation in self.animations.keys():
             full_path = 'assets/character_sprites/' + animation
             self.animations[animation] = support.import_folder(full_path)
-        print(self.animations)
+
+    def animate(self, dt):
+        self.frame_index += 1 * dt
+        if self.frame_index >= len(self.animations[self.status]):
+            self.frame_index = 0
+
+        self.image = self.animations[self.status][int(self.frame_index)]
 
     def input(self):
         keys = pygame.key.get_pressed()
 
         if keys[pygame.K_w]:
             self.direction.y = -1
+            self.status = 'up'
         elif keys[pygame.K_s]:
             self.direction.y = 1
+            self.status = 'down'
         else:
             self.direction.y = 0
 
         if keys[pygame.K_d]:
             self.direction.x = 1
+            self.status = 'right'
         elif keys[pygame.K_a]:
             self.direction.x = -1
+            self.status = 'left'
         else:
             self.direction.x = 0
     
@@ -63,6 +73,7 @@ class Player():
     def update(self, dt):
         self.input()
         self.move(dt)
+        self.animate(dt)
 
     def draw(self, screen):
         screen.blit(self.image, self.pos)
@@ -99,7 +110,7 @@ def main():
         # Render & Display
         pygame.display.flip()
         # Maintain FPS
-        dt = clock.tick(24)
+        dt = clock.tick() / 100
     pygame.quit()
 
 
