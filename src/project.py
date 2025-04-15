@@ -1,3 +1,5 @@
+import support
+
 import sys
 
 import pygame
@@ -10,13 +12,25 @@ class Player():
 
     def __init__(self, pos):
 
-        self.image = pygame.Surface((32, 64))
-        self.image.fill('black')
+        self.import_assets()
+        self.status = 'down'
+        self.frame_index = 0
+
+        self.image = self.animations[self.status][self.frame_index]
         self.rect = self.image.get_rect(center = pos)
 
         self.direction = pygame.math.Vector2()
         self.pos = pygame.math.Vector2(self.rect.center)
         self.speed = 0.25 # milliseconds
+
+    def import_assets(self):
+        self.animations = {'up': [], 'down': [], 'left': [], 'right': [], 
+                           'up_idle': [], 'down_idle': [], 'left_idle': [], 'right_idle': [],
+                           'up_plant': [], 'down_plant': [], 'left_plant': [], 'right_plant': []}
+        for animation in self.animations.keys():
+            full_path = 'assets/character_sprites/' + animation
+            self.animations[animation] = support.import_folder(full_path)
+        print(self.animations)
 
     def input(self):
         keys = pygame.key.get_pressed()
