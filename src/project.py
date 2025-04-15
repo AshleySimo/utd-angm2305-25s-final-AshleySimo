@@ -58,6 +58,10 @@ class Player():
             self.status = 'left'
         else:
             self.direction.x = 0
+        
+    def get_status(self):
+        if self.direction.magnitude() == 0:
+            self.status = self.status.split('_')[0] + '_idle'
     
     def move(self, dt):
         if self.direction.magnitude() > 0:
@@ -72,6 +76,7 @@ class Player():
 
     def update(self, dt):
         self.input()
+        self.get_status()
         self.move(dt)
         self.animate(dt)
 
