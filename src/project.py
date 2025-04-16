@@ -21,7 +21,7 @@ class Player():
 
         self.direction = pygame.math.Vector2()
         self.pos = pygame.math.Vector2(self.rect.center)
-        self.speed = 25
+        self.speed = 20
 
         self.timers = {'tool use': support.Timer(350, self.use_tool)}
 
@@ -135,7 +135,7 @@ def main():
         # Render & Display
         pygame.display.flip()
         # Maintain FPS
-        dt = clock.tick() / 100
+        dt = clock.tick(24) / 100
     pygame.quit()
 
 
