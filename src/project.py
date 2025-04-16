@@ -10,14 +10,15 @@ SCREEN_HEIGHT = 480
 
 class Player():
 
-    def __init__(self, pos):
+    def __init__(self, pos=(0, 0)):
 
         self.import_assets()
+
         self.status = 'down'
         self.frame_index = 0
 
         self.image = self.animations[self.status][self.frame_index]
-        self.rect = self.image.get_rect(center = pos)
+        self.rect = pygame.Surface.get_rect(self.image, center=(pos))
 
         self.direction = pygame.math.Vector2()
         self.pos = pygame.math.Vector2(self.rect.center)
@@ -115,7 +116,7 @@ def main():
     
     grass_tile = pygame.image.load("assets/ground_sprites/grass_tile.png").convert_alpha()
 
-    player = Player((320, 240))
+    player = Player(pos=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2))
 
     running = True
     while running:
