@@ -40,7 +40,7 @@ class Player():
             self.animations[animation] = support.import_folder(full_path)
 
     def animate(self, dt):
-        self.frame_index += 1 * dt
+        self.frame_index += 0.5 * dt
         if self.frame_index >= len(self.animations[self.status]):
             self.frame_index = 0
 
