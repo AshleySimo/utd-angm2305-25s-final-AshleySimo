@@ -18,7 +18,11 @@ class Player():
         self.frame_index = 0
 
         self.image = self.animations[self.status][self.frame_index]
-        self.rect = pygame.Surface.get_rect(self.image, center=(pos))
+
+        # FIX POSITION TO BE AT CENTER OF IMAGE RECT # 
+        
+        self.rect = pygame.Surface.get_rect(self.image, center=pos)
+        self.rect.center = pos
 
         self.direction = pygame.math.Vector2()
         self.pos = pygame.math.Vector2(self.rect.center)
@@ -29,7 +33,7 @@ class Player():
         self.selected_tool = 'plant'
 
     def use_tool(self):
-        print(self.selected_tool)
+        print(self.rect)
 
     def import_assets(self):
         self.animations = {'up': [], 'down': [], 'left': [], 'right': [], 
