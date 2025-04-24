@@ -33,8 +33,10 @@ class Player():
         self.selected_tool = 'plant'
         self.selected_seed = 'flower'
 
-        self.item_inventory = {'flower': 0,
-                               'seed': 0}
+        self.inventory = {'flower': 5}
+        self.money = 200
+
+        self.shop_active = False
         
         self.soil_layer = SoilLayer()
 
@@ -81,7 +83,18 @@ class Player():
                 self.timers['tool use'].activate()
                 self.direction = pygame.math.Vector2()
                 self.frame_index = 0
-                self.soil_layer.plant_seed(self.hitbox, self.selected_seed)
+                if self.inventory[self.selected_seed] > 0:
+                    self.soil_layer.plant_seed(self.hitbox, self.selected_seed)
+                    self.inventory[self.selected_seed] -= 1
+            
+            if keys[pygame.K_e]:
+                self.toggle_shop()
+                shop = Menu(self, self.shop_active)
+                shop.update()
+    
+    def toggle_shop(self):
+        self.shop_active = not self.shop_active
+
         
     def get_status(self):
         if self.direction.magnitude() == 0:
@@ -119,6 +132,19 @@ class Player():
 
     def draw(self, screen):
         screen.blit(self.image, self.pos)
+
+class Menu:
+    def __init__(self, player, toggle_menu):
+        self.player = player
+        self.toggle_menu = toggle_menu
+        self.display_surface = pygame.display.get_surface()
+
+        self.surface = pygame.Surface((100, 100))
+        self.surface.fill('black')
+        self.font = pygame.font.SysFont("8514oem", 10)
+
+    def update(self):
+        self.display_surface.blit(self.surface, (0, 0))
 
 class SoilLayer:
 
@@ -183,7 +209,6 @@ class Plant:
         self.soil.blit(self.image, (self.soil_rect.x, self.soil_rect.y))
       
 
-
 def main():
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -203,6 +228,7 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
                 sys.exit()
+
 
         # Game Logic
         player.update(dt)
