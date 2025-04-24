@@ -18,9 +18,7 @@ class Player():
         self.status = 'down'
         self.frame_index = 0
 
-        self.image = self.animations[self.status][self.frame_index]
-
-        # FIX POSITION TO BE AT CENTER OF IMAGE RECT # 
+        self.image = self.animations[self.status][self.frame_index] 
         
         self.rect = self.image.get_rect(center = pos)
         self.rect.center = pos
@@ -154,7 +152,9 @@ class SoilLayer:
                 y = rect.y // TILE_SIZE
                 if 'P' not in self.grid[y][x]:
                     self.grid[y][x].append('P')
-                    Plant(seed, rect)
+                    rect_surface = pygame.Surface((rect.w, rect.h))
+                    Plant(seed, rect_surface)
+                    # print(self.grid)
 
     def draw(self, screen):
         for x in range(0, SCREEN_WIDTH, TILE_SIZE):
@@ -167,14 +167,21 @@ class Plant:
         self.plant_type = plant_type
         self.frames = support.import_folder(f'assets/plant_sprites/{plant_type}')
         self.soil = soil
+        self.soil_rect = pygame.Surface.get_rect(self.soil)
+        # self.surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), 
+                                    #   pygame.SRCALPHA)
         self.age = 0
         self.max_age = len(self.frames) - 1
         self.grow_speed = 5
-        self.image = self.frames[self.age]
+        self.image = pygame.image.load('assets/plant_sprites/flower/0.png')
         self.y_offset = -16
-        self.rect = self.image.get_rect(midbottom = soil.midbottom +
-                                         pygame.math.Vector2(0, self.y_offset))
-        
+        self.rect = pygame.Surface.get_rect(self.image)
+
+        self.draw()
+
+    def draw(self):
+        self.soil.blit(self.image, (self.soil_rect.x, self.soil_rect.y))
+      
 
 
 def main():
@@ -186,8 +193,8 @@ def main():
     dt = 0
 
     soil = SoilLayer()
-
     player = Player(pos=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2))
+    # plant = Plant(player.selected_seed, soil.sprite)
 
     running = True
     while running:
@@ -201,6 +208,7 @@ def main():
         player.update(dt)
         # Render & Display
         soil.draw(screen)
+        # plant.draw(screen)
         player.draw(screen)
         # Render & Display
         pygame.display.flip()
