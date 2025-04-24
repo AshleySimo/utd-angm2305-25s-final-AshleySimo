@@ -7,10 +7,11 @@ import pygame
 
 SCREEN_WIDTH = 640
 SCREEN_HEIGHT = 480
+TILE_SIZE = 64
 
 class Player():
 
-    def __init__(self, pos=(0, 0)):
+    def __init__(self, pos=(320, 240)):
 
         self.import_assets()
 
@@ -21,19 +22,26 @@ class Player():
 
         # FIX POSITION TO BE AT CENTER OF IMAGE RECT # 
         
-        self.rect = pygame.Surface.get_rect(self.image, center=pos)
+        self.rect = self.image.get_rect(center = pos)
         self.rect.center = pos
+        self.hitbox = self.rect.copy().inflate((-32, -64))
 
         self.direction = pygame.math.Vector2()
-        self.pos = pygame.math.Vector2(self.rect.center)
+        self.pos = pygame.math.Vector2((pos[0]-32, pos[1]-64))
         self.speed = 20
 
         self.timers = {'tool use': support.Timer(350, self.use_tool)}
 
         self.selected_tool = 'plant'
+        self.selected_seed = 'flower'
+
+        self.item_inventory = {'flower': 0,
+                               'seed': 0}
+        
+        self.soil_layer = SoilLayer()
 
     def use_tool(self):
-        print(self.rect)
+        pass
 
     def import_assets(self):
         self.animations = {'up': [], 'down': [], 'left': [], 'right': [], 
@@ -75,6 +83,7 @@ class Player():
                 self.timers['tool use'].activate()
                 self.direction = pygame.math.Vector2()
                 self.frame_index = 0
+                self.soil_layer.plant_seed(self.hitbox, self.selected_seed)
         
     def get_status(self):
         if self.direction.magnitude() == 0:
@@ -93,10 +102,15 @@ class Player():
 
         # Horizontal Movement
         self.pos.x += self.direction.x * self.speed * dt
-        self.rect.centerx = self.pos.x
+        self.hitbox.centerx = round(self.pos.x)
+        self.rect.centerx = self.hitbox.centerx
         # Vertical Movement
         self.pos.y += self.direction.y * self.speed * dt
-        self.rect.centery = self.pos.y
+        self.hitbox.centery = round(self.pos.y)
+        self.rect.centery = self.hitbox.centery
+
+    def add_item(self, item):
+        self.item_inventory[item] += 1
 
     def update(self, dt):
         self.input()
@@ -108,6 +122,59 @@ class Player():
     def draw(self, screen):
         screen.blit(self.image, self.pos)
 
+class SoilLayer:
+
+    def __init__(self):
+        self.sprite = pygame.image.load('assets/ground_sprites'
+        '/grass_tile.png').convert_alpha()
+
+        self.create_soil_grid()
+        self.create_hit_rects()
+
+    def create_soil_grid(self):
+        h_tiles = SCREEN_WIDTH // TILE_SIZE
+        v_tiles = SCREEN_HEIGHT // TILE_SIZE
+        
+        self.grid = [[['F'] for col in range(h_tiles)] for row in range(v_tiles)]
+        
+    def create_hit_rects(self):
+        self.hit_rects = []
+        for idx_row, row in enumerate(self.grid):
+            for idx_col, cell in enumerate(row):
+                if 'F' in cell:
+                    x = idx_col * TILE_SIZE
+                    y = idx_row * TILE_SIZE
+                    rect = pygame.Rect(x, y, TILE_SIZE//2, TILE_SIZE//2)
+                    self.hit_rects.append(rect)
+    
+    def plant_seed(self, hitbox, seed):
+        for rect in self.hit_rects:
+            if rect.colliderect(hitbox):
+                x = rect.x // TILE_SIZE
+                y = rect.y // TILE_SIZE
+                if 'P' not in self.grid[y][x]:
+                    self.grid[y][x].append('P')
+                    Plant(seed, rect)
+
+    def draw(self, screen):
+        for x in range(0, SCREEN_WIDTH, TILE_SIZE):
+            for y in range(0, SCREEN_HEIGHT, TILE_SIZE):
+                screen.blit(self.sprite, (x, y))
+
+class Plant:
+
+    def __init__(self, plant_type, soil):
+        self.plant_type = plant_type
+        self.frames = support.import_folder(f'assets/plant_sprites/{plant_type}')
+        self.soil = soil
+        self.age = 0
+        self.max_age = len(self.frames) - 1
+        self.grow_speed = 5
+        self.image = self.frames[self.age]
+        self.y_offset = -16
+        self.rect = self.image.get_rect(midbottom = soil.midbottom +
+                                         pygame.math.Vector2(0, self.y_offset))
+        
 
 
 def main():
@@ -117,8 +184,8 @@ def main():
 
     clock = pygame.time.Clock()
     dt = 0
-    
-    grass_tile = pygame.image.load("assets/ground_sprites/grass_tile.png").convert_alpha()
+
+    soil = SoilLayer()
 
     player = Player(pos=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2))
 
@@ -132,10 +199,8 @@ def main():
 
         # Game Logic
         player.update(dt)
-        # Tiled Background
-        for x in range(0, SCREEN_WIDTH, grass_tile.get_width()):
-            for y in range(0, SCREEN_HEIGHT, grass_tile.get_height()):
-                screen.blit(grass_tile, (x, y))
+        # Render & Display
+        soil.draw(screen)
         player.draw(screen)
         # Render & Display
         pygame.display.flip()
