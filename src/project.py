@@ -32,11 +32,6 @@ class Player():
 
         self.selected_tool = 'plant'
         self.selected_seed = 'flower'
-
-        self.inventory = {'flower': 5}
-        self.money = 200
-
-        self.shop_active = False
         
         self.soil_layer = SoilLayer()
 
@@ -83,18 +78,7 @@ class Player():
                 self.timers['tool use'].activate()
                 self.direction = pygame.math.Vector2()
                 self.frame_index = 0
-                if self.inventory[self.selected_seed] > 0:
-                    self.soil_layer.plant_seed(self.hitbox)
-                    self.inventory[self.selected_seed] -= 1
-            
-            # if keys[pygame.K_e]:
-            #     self.toggle_shop()
-            #     shop = Menu(self, self.shop_active)
-            #     shop.update()
-    
-    # def toggle_shop(self):
-    #     self.shop_active = not self.shop_active
-
+                self.soil_layer.plant_seed(self.hitbox)
         
     def get_status(self):
         if self.direction.magnitude() == 0:
@@ -120,9 +104,6 @@ class Player():
         self.hitbox.centery = round(self.pos.y)
         self.rect.centery = self.hitbox.centery
 
-    def add_item(self, item):
-        self.item_inventory[item] += 1
-
     def update(self, dt):
         self.input()
         self.get_status()
@@ -132,19 +113,6 @@ class Player():
 
     def draw(self, screen):
         screen.blit(self.image, self.pos)
-
-# class Menu:
-#     def __init__(self, player, toggle_menu):
-#         self.player = player
-#         self.toggle_menu = toggle_menu
-#         self.display_surface = pygame.display.get_surface()
-
-#         self.surface = pygame.Surface((100, 100))
-#         self.surface.fill('black')
-#         self.font = pygame.font.SysFont("8514oem", 10)
-
-#     def update(self):
-#         self.display_surface.blit(self.surface, (0, 0))
 
 class SoilLayer:
 
@@ -179,7 +147,7 @@ class SoilLayer:
                 if 'P' not in self.grid[y][x]:
                     self.grid[y][x].append('P')
                     rect_surface = pygame.Surface((rect.w, rect.h))
-                    plant = Plant(rect_surface)
+                    plant = Plant(rect)
                     plant.draw(rect_surface)
                     print('plant')
 
@@ -193,7 +161,7 @@ class Plant:
     def __init__(self, soil):
         self.frames = support.import_folder(f'assets/plant_sprites')
         self.soil = soil
-        self.soil_rect = pygame.Surface.get_rect(self.soil)
+        # self.soil_rect = pygame.Surface.get_rect(self.soil)
 
         # self.surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), 
                                     #   pygame.SRCALPHA)
@@ -206,7 +174,7 @@ class Plant:
         self.rect = pygame.Surface.get_rect(self.image)
 
     def draw(self, screen):
-        screen.blit(self.image, (self.soil_rect.x, self.soil_rect.y))
+        screen.blit(self.image, (self.soil.x, self.soil.y))
       
 
 def main():
