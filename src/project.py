@@ -84,16 +84,16 @@ class Player():
                 self.direction = pygame.math.Vector2()
                 self.frame_index = 0
                 if self.inventory[self.selected_seed] > 0:
-                    self.soil_layer.plant_seed(self.hitbox, self.selected_seed)
+                    self.soil_layer.plant_seed(self.hitbox)
                     self.inventory[self.selected_seed] -= 1
             
-            if keys[pygame.K_e]:
-                self.toggle_shop()
-                shop = Menu(self, self.shop_active)
-                shop.update()
+            # if keys[pygame.K_e]:
+            #     self.toggle_shop()
+            #     shop = Menu(self, self.shop_active)
+            #     shop.update()
     
-    def toggle_shop(self):
-        self.shop_active = not self.shop_active
+    # def toggle_shop(self):
+    #     self.shop_active = not self.shop_active
 
         
     def get_status(self):
@@ -133,18 +133,18 @@ class Player():
     def draw(self, screen):
         screen.blit(self.image, self.pos)
 
-class Menu:
-    def __init__(self, player, toggle_menu):
-        self.player = player
-        self.toggle_menu = toggle_menu
-        self.display_surface = pygame.display.get_surface()
+# class Menu:
+#     def __init__(self, player, toggle_menu):
+#         self.player = player
+#         self.toggle_menu = toggle_menu
+#         self.display_surface = pygame.display.get_surface()
 
-        self.surface = pygame.Surface((100, 100))
-        self.surface.fill('black')
-        self.font = pygame.font.SysFont("8514oem", 10)
+#         self.surface = pygame.Surface((100, 100))
+#         self.surface.fill('black')
+#         self.font = pygame.font.SysFont("8514oem", 10)
 
-    def update(self):
-        self.display_surface.blit(self.surface, (0, 0))
+#     def update(self):
+#         self.display_surface.blit(self.surface, (0, 0))
 
 class SoilLayer:
 
@@ -171,7 +171,7 @@ class SoilLayer:
                     rect = pygame.Rect(x, y, TILE_SIZE//2, TILE_SIZE//2)
                     self.hit_rects.append(rect)
     
-    def plant_seed(self, hitbox, seed):
+    def plant_seed(self, hitbox):
         for rect in self.hit_rects:
             if rect.colliderect(hitbox):
                 x = rect.x // TILE_SIZE
@@ -179,8 +179,9 @@ class SoilLayer:
                 if 'P' not in self.grid[y][x]:
                     self.grid[y][x].append('P')
                     rect_surface = pygame.Surface((rect.w, rect.h))
-                    Plant(seed, rect_surface)
-                    # print(self.grid)
+                    plant = Plant(rect_surface)
+                    plant.draw(rect_surface)
+                    print('plant')
 
     def draw(self, screen):
         for x in range(0, SCREEN_WIDTH, TILE_SIZE):
@@ -189,24 +190,23 @@ class SoilLayer:
 
 class Plant:
 
-    def __init__(self, plant_type, soil):
-        self.plant_type = plant_type
-        self.frames = support.import_folder(f'assets/plant_sprites/{plant_type}')
+    def __init__(self, soil):
+        self.frames = support.import_folder(f'assets/plant_sprites')
         self.soil = soil
         self.soil_rect = pygame.Surface.get_rect(self.soil)
+
         # self.surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), 
                                     #   pygame.SRCALPHA)
         self.age = 0
         self.max_age = len(self.frames) - 1
         self.grow_speed = 5
-        self.image = pygame.image.load('assets/plant_sprites/flower/0.png')
-        self.y_offset = -16
+
+        self.image = pygame.image.load('assets/plant_sprites/0.png').convert_alpha()
+        # self.y_offset = -16
         self.rect = pygame.Surface.get_rect(self.image)
 
-        self.draw()
-
-    def draw(self):
-        self.soil.blit(self.image, (self.soil_rect.x, self.soil_rect.y))
+    def draw(self, screen):
+        screen.blit(self.image, (self.soil_rect.x, self.soil_rect.y))
       
 
 def main():
