@@ -1,7 +1,5 @@
 import support
-
 import sys
-
 import pygame
 
 
@@ -11,7 +9,7 @@ TILE_SIZE = 64
 
 class Player():
 
-    def __init__(self, pos=(320, 240)):
+    def __init__(self, pos=(320, 240), soil_layer=None):
 
         self.import_assets()
 
@@ -33,7 +31,7 @@ class Player():
         self.selected_tool = 'plant'
         self.selected_seed = 'flower'
         
-        self.soil_layer = SoilLayer()
+        self.soil_layer = soil_layer
 
     def use_tool(self):
         pass
@@ -119,14 +117,13 @@ class SoilLayer:
     def __init__(self):
         self.sprite = pygame.image.load('assets/ground_sprites'
         '/grass_tile.png').convert_alpha()
-
         self.create_soil_grid()
         self.create_hit_rects()
+        self.plants = []
 
     def create_soil_grid(self):
         h_tiles = SCREEN_WIDTH // TILE_SIZE
         v_tiles = SCREEN_HEIGHT // TILE_SIZE
-        
         self.grid = [[['F'] for col in range(h_tiles)] for row in range(v_tiles)]
         
     def create_hit_rects(self):
@@ -146,31 +143,28 @@ class SoilLayer:
                 y = rect.y // TILE_SIZE
                 if 'P' not in self.grid[y][x]:
                     self.grid[y][x].append('P')
-                    rect_surface = pygame.Surface((rect.w, rect.h))
                     plant = Plant(rect)
-                    plant.draw(rect_surface)
+                    self.plants.append(plant)
                     print('plant')
 
     def draw(self, screen):
         for x in range(0, SCREEN_WIDTH, TILE_SIZE):
             for y in range(0, SCREEN_HEIGHT, TILE_SIZE):
                 screen.blit(self.sprite, (x, y))
+        
+        for plant in self.plants:
+            plant.draw(screen)
 
 class Plant:
 
     def __init__(self, soil):
         self.frames = support.import_folder(f'assets/plant_sprites')
         self.soil = soil
-        # self.soil_rect = pygame.Surface.get_rect(self.soil)
-
-        # self.surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), 
-                                    #   pygame.SRCALPHA)
         self.age = 0
         self.max_age = len(self.frames) - 1
         self.grow_speed = 5
 
-        self.image = pygame.image.load('assets/plant_sprites/0.png').convert_alpha()
-        # self.y_offset = -16
+        self.image = pygame.image.load(f'assets/plant_sprites/{self.age}.png').convert_alpha()
         self.rect = pygame.Surface.get_rect(self.image)
 
     def draw(self, screen):
@@ -186,7 +180,7 @@ def main():
     dt = 0
 
     soil = SoilLayer()
-    player = Player(pos=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2))
+    player = Player(pos=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2), soil_layer=soil)
     # plant = Plant(player.selected_seed, soil.sprite)
 
     running = True
@@ -197,12 +191,10 @@ def main():
                 running = False
                 sys.exit()
 
-
         # Game Logic
         player.update(dt)
         # Render & Display
         soil.draw(screen)
-        # plant.draw(screen)
         player.draw(screen)
         # Render & Display
         pygame.display.flip()
