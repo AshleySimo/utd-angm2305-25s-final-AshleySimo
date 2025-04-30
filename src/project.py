@@ -146,6 +146,10 @@ class SoilLayer:
                     plant = Plant(rect)
                     self.plants.append(plant)
                     print('plant')
+    
+    def update(self, dt):
+        for plant in self.plants:
+            plant.update(dt)
 
     def draw(self, screen):
         for x in range(0, SCREEN_WIDTH, TILE_SIZE):
@@ -162,10 +166,21 @@ class Plant:
         self.soil = soil
         self.age = 0
         self.max_age = len(self.frames) - 1
-        self.grow_speed = 5
+        self.grow_speed = 1.10
+        self.harvestable = False
 
         self.image = pygame.image.load(f'assets/plant_sprites/{self.age}.png').convert_alpha()
         self.rect = pygame.Surface.get_rect(self.image)
+
+    def grow(self, dt):
+        self.age += round(1 * dt * self.grow_speed)
+        if self.age > self.max_age:
+            self.age = 3
+            self.harvestable = True
+        self.image = pygame.image.load(f'assets/plant_sprites/{self.age}.png').convert_alpha()
+
+    def update(self, dt):
+        self.grow(dt)
 
     def draw(self, screen):
         screen.blit(self.image, (self.soil.x, self.soil.y))
@@ -192,6 +207,7 @@ def main():
                 sys.exit()
 
         # Game Logic
+        soil.update(dt)
         player.update(dt)
         # Render & Display
         soil.draw(screen)
