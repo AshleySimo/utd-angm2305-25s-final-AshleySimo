@@ -102,12 +102,18 @@ class Player():
         self.hitbox.centery = round(self.pos.y)
         self.rect.centery = self.hitbox.centery
 
+    def check_harvest(self):
+        for plant in self.soil_layer.plants:
+            if self.soil_layer.check_collision(self.hitbox):
+                self.soil_layer.harvest_plant()
+
     def update(self, dt):
         self.input()
         self.get_status()
         self.update_timers()
         self.move(dt)
         self.animate(dt)
+        self.check_harvest()
 
     def draw(self, screen):
         screen.blit(self.image, self.pos)
@@ -147,6 +153,21 @@ class SoilLayer:
                     self.plants.append(plant)
                     print('plant')
     
+    def check_collision(self, hitbox):
+        for rect in self.hit_rects:
+            if rect.colliderect(hitbox):
+                return True
+            else:
+                return False
+
+    def harvest_plant(self):
+        for plant in self.plants:
+            if plant.harvestable:
+                plant.dead = True
+                del plant
+            else:
+                pass
+    
     def update(self, dt):
         for plant in self.plants:
             plant.update(dt)
@@ -166,23 +187,26 @@ class Plant:
         self.soil = soil
         self.age = 0
         self.max_age = len(self.frames) - 1
-        self.grow_speed = 1.10
+        self.grow_speed = 1.20
         self.harvestable = False
+        self.dead = False
 
-        self.image = pygame.image.load(f'assets/plant_sprites/{self.age}.png').convert_alpha()
+        self.image = self.frames[int(self.age)]
         self.rect = pygame.Surface.get_rect(self.image)
 
     def grow(self, dt):
         self.age += round(1 * dt * self.grow_speed)
-        if self.age > self.max_age:
-            self.age = 3
+        if self.age >= self.max_age:
+            self.age = self.max_age
             self.harvestable = True
-        self.image = pygame.image.load(f'assets/plant_sprites/{self.age}.png').convert_alpha()
+        self.image = self.frames[int(self.age)]
 
     def update(self, dt):
         self.grow(dt)
 
     def draw(self, screen):
+        if self.dead:
+            return
         screen.blit(self.image, (self.soil.x, self.soil.y))
       
 
