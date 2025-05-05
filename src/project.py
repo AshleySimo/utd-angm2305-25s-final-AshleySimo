@@ -102,18 +102,21 @@ class Player():
         self.hitbox.centery = round(self.pos.y)
         self.rect.centery = self.hitbox.centery
 
-    def check_harvest(self):
-        for plant in self.soil_layer.plants:
-            if self.soil_layer.check_collision(self.hitbox):
-                self.soil_layer.harvest_plant()
+    def check_plant_collision(self):
+        for rect in self.soil_layer.hit_rects:
+            if self.hitbox.colliderect(rect):
+                x = rect.x // TILE_SIZE
+                y = rect.y // TILE_SIZE
+                if 'P' in self.soil_layer.grid[y][x]:
+                    self.soil_layer.harvest()
 
     def update(self, dt):
         self.input()
         self.get_status()
         self.update_timers()
         self.move(dt)
+        self.check_plant_collision()
         self.animate(dt)
-        self.check_harvest()
 
     def draw(self, screen):
         screen.blit(self.image, self.pos)
@@ -151,22 +154,12 @@ class SoilLayer:
                     self.grid[y][x].append('P')
                     plant = Plant(rect)
                     self.plants.append(plant)
-                    print('plant')
     
-    def check_collision(self, hitbox):
-        for rect in self.hit_rects:
-            if rect.colliderect(hitbox):
-                return True
-            else:
-                return False
-
-    def harvest_plant(self):
+    def harvest(self):
         for plant in self.plants:
             if plant.harvestable:
-                plant.dead = True
-                del plant
-            else:
-                pass
+                plant.kill()
+                self.plants.remove(plant)
     
     def update(self, dt):
         for plant in self.plants:
@@ -187,7 +180,7 @@ class Plant:
         self.soil = soil
         self.age = 0
         self.max_age = len(self.frames) - 1
-        self.grow_speed = 1.20
+        self.grow_speed = 1.15
         self.harvestable = False
         self.dead = False
 
@@ -200,6 +193,13 @@ class Plant:
             self.age = self.max_age
             self.harvestable = True
         self.image = self.frames[int(self.age)]
+        self.rect = pygame.Surface.get_rect(self.image)
+
+    def kill(self):
+        if self.harvestable:
+            self.dead = True
+        elif self.age < self.max_age:
+            self.dead = False
 
     def update(self, dt):
         self.grow(dt)
