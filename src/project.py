@@ -20,16 +20,16 @@ class Player():
         
         self.rect = self.image.get_rect(center = pos)
         self.rect.center = pos
-        self.hitbox = self.rect.copy().inflate((-32, -64))
+        self.hitbox = self.rect.copy().inflate((-32, -80))
 
         self.direction = pygame.math.Vector2()
         self.pos = pygame.math.Vector2((pos[0]-32, pos[1]-64))
         self.speed = 20
-
         self.timers = {'tool use': support.Timer(350, self.use_tool)}
 
         self.selected_tool = 'plant'
         self.selected_seed = 'flower'
+        self.inventory = {'flowers': 0}
         
         self.soil_layer = soil_layer
 
@@ -77,6 +77,7 @@ class Player():
                 self.direction = pygame.math.Vector2()
                 self.frame_index = 0
                 self.soil_layer.plant_seed(self.hitbox)
+                self.inventory["flowers"] += 1
         
     def get_status(self):
         if self.direction.magnitude() == 0:
@@ -160,6 +161,11 @@ class SoilLayer:
             if plant.harvestable:
                 plant.kill()
                 self.plants.remove(plant)
+                for rect in self.hit_rects:
+                    x = rect.x // TILE_SIZE
+                    y = rect.y // TILE_SIZE
+                    if 'P' in self.grid[y][x]:
+                        self.grid[y][x].remove('P')
     
     def update(self, dt):
         for plant in self.plants:
@@ -208,6 +214,21 @@ class Plant:
         if self.dead:
             return
         screen.blit(self.image, (self.soil.x, self.soil.y))
+
+class FlowerCount:
+    def __init__(self, player):
+        self.player = player
+        self.font = pygame.font.SysFont("8514oem", 30)
+        self.pos = (0, 0)
+        self.content = f"Flowers Planted: {self.player.inventory["flowers"]}"
+
+    def update(self):
+        self.content = f"Flowers Planted: {self.player.inventory["flowers"]}"
+
+    def render_text(self, surface):
+        self.text_surface = self.font.render(self.content, False, (0, 0, 0))
+        surface.blit(self.text_surface, self.pos)
+
       
 
 def main():
@@ -220,7 +241,7 @@ def main():
 
     soil = SoilLayer()
     player = Player(pos=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2), soil_layer=soil)
-    # plant = Plant(player.selected_seed, soil.sprite)
+    flower_count = FlowerCount(player)
 
     running = True
     while running:
@@ -233,9 +254,11 @@ def main():
         # Game Logic
         soil.update(dt)
         player.update(dt)
+        flower_count.update()
         # Render & Display
         soil.draw(screen)
         player.draw(screen)
+        flower_count.render_text(screen)
         # Render & Display
         pygame.display.flip()
         # Maintain FPS
