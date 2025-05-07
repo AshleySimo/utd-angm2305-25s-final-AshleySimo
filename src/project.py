@@ -187,7 +187,7 @@ class Plant:
         self.soil = soil
         self.age = 0
         self.max_age = len(self.frames) - 1
-        self.grow_speed = 1.15
+        self.grow_speed = 1.17
         self.harvestable = False
         self.dead = False
 
