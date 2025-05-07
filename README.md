@@ -26,5 +26,7 @@ Future Areas of Improvement
 ## Tutorials/References
 Stardew Valley Inspired Farming Game
 https://youtu.be/T4IX36sP_0c?si=kugHLDFCf1bOIlNG
+  - I followed this tutorial in the beginning of development, and I ended up largely using it for help with the walk cycle, the planting animation, and creating the hitboxes/attributes for the player and tileable background. I created all of my own sprites and implemented my own planting, growing, harvesting, and counting system for Desktop Flower Farm.
+
 Reference for collisions
 https://youtu.be/BHr9jxKithk?si=AJyZrDZPMN10SFTX
