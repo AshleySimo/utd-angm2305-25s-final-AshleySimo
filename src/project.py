@@ -21,7 +21,7 @@ class Player():
         self.rect = self.image.get_rect(center = pos)
         self.rect.center = pos
         self.hitbox = self.rect.copy().inflate((-32, -80))
-        self.hitbox.center = pos
+        self.hitbox.center = (pos[0], pos[1]-32)
 
         self.direction = pygame.math.Vector2()
         self.pos = pygame.math.Vector2((pos[0]-32, pos[1]-64))
