@@ -195,7 +195,7 @@ class Plant:
         self.rect = pygame.Surface.get_rect(self.image)
 
     def grow(self, dt):
-        self.age += round(1 * dt * self.grow_speed)
+        self.age += round(dt * self.grow_speed)
         if self.age >= self.max_age:
             self.age = self.max_age
             self.harvestable = True
